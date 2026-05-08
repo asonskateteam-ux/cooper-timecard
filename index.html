@@ -1,0 +1,1107 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Cooper Timecard</title>
+    <meta name="theme-color" content="#111111" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="apple-touch-icon.png" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #e7edf6;
+            --card: #ffffff;
+            --ink: #343944;
+            --muted: #7a8493;
+            --input: #f8f4f5;
+            --blue: #9fb4cc;
+            --blue-dark: #7f98b4;
+            --red: #b98386;
+            --red-dark: #9f6d71;
+            --charcoal: #4a4644;
+            --shadow: 0 8px 22px rgba(42, 52, 68, 0.08);
+            --radius: 18px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+        }
+
+        .app {
+            width: min(100%, 470px);
+            margin: 0 auto;
+            padding: 24px 18px 64px;
+        }
+
+        @media (min-width: 900px) {
+            .app {
+                width: min(100%, 620px);
+                padding-top: 34px;
+            }
+
+            header h1 {
+                font-size: 36px;
+            }
+
+            .card {
+                padding: 22px;
+                margin-bottom: 22px;
+            }
+
+            input, textarea {
+                font-size: 15px;
+                padding: 13px 14px;
+            }
+
+            label {
+                font-size: 11px;
+            }
+
+            .btn-row button {
+                min-width: 90px;
+                padding: 12px 16px;
+                font-size: 12px;
+            }
+
+            .entry-list {
+                min-height: 170px;
+            }
+
+            .timecard-wrap {
+                min-height: 230px;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+            header h1 {
+                margin: 0;
+                font-size: 28px;
+                letter-spacing: -0.4px;
+                color: #505866;
+                line-height: 1.1;
+            }
+
+                header h1 .title-strong {
+                    font-weight: 800;
+                }
+
+                header h1 .title-soft {
+                    font-weight: 400;
+                    font-style: italic;
+                    opacity: 0.9;
+                }
+
+            header p {
+                display: none;
+            }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 7px;
+            padding: 12px 14px;
+            font: 700 13px Arial, Helvetica, sans-serif;
+            letter-spacing: 0.1px;
+            box-shadow: 0 3px 9px rgba(42, 52, 68, 0.07);
+        }
+
+        .tab-btn {
+            background: var(--blue);
+            color: white;
+        }
+
+            .tab-btn.active {
+                background: var(--blue-dark);
+                color: white;
+            }
+
+        #savedTabBtn {
+            background: var(--red);
+        }
+
+            #savedTabBtn.active {
+                background: var(--red-dark);
+            }
+
+        .card {
+            background: var(--card);
+            border-radius: 4px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+            .card h2 {
+                color: var(--ink);
+                font-size: 13px;
+                font-weight: 700;
+                margin-top: 0;
+                margin-bottom: 12px;
+            }
+
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #303641;
+            margin-bottom: 6px;
+        }
+
+        input, textarea {
+            width: 100%;
+            border: 1px solid transparent;
+            border-radius: 2px;
+            padding: 11px 12px;
+            font-size: 13px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--input);
+            color: var(--ink);
+            outline: none;
+        }
+
+            input:focus,
+            textarea:focus {
+                border-color: var(--blue-dark);
+                box-shadow: 0 0 0 3px rgba(127, 152, 180, 0.18);
+            }
+
+        textarea {
+            min-height: 42px;
+            resize: vertical;
+        }
+
+        input:disabled {
+            opacity: 0.9;
+            color: #6b7280;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .btn-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+            .btn-row button {
+                min-width: 72px;
+                padding: 10px 13px;
+                font-size: 11px;
+            }
+
+        @media (min-width: 430px) {
+            .grid.two {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid.three {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .primary {
+            background: var(--blue);
+            color: white;
+        }
+
+            .primary:hover {
+                background: var(--blue-dark);
+            }
+
+        .secondary {
+            background: var(--charcoal);
+            color: white;
+        }
+
+        .danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 12px 0 0;
+            text-align: center;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .entry-list {
+            display: grid;
+            gap: 10px;
+            min-height: 130px;
+            background: var(--input);
+            padding: 12px;
+            border-radius: 2px;
+        }
+
+        .entry-item, .saved-item {
+            border: 1px solid rgba(42, 52, 68, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            background: white;
+            box-shadow: 0 3px 10px rgba(42, 52, 68, 0.04);
+        }
+
+            .entry-item strong {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 13px;
+                color: var(--ink);
+            }
+
+        .entry-meta {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .saved-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .saved-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+            .saved-actions button {
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+        .timecard-wrap {
+            overflow-x: hidden;
+            overflow-y: hidden;
+            width: 100%;
+            background: var(--input);
+            border-radius: 2px;
+            min-height: 165px;
+            padding: 10px;
+        }
+
+        .timecard-scale {
+            width: 1130px;
+            transform-origin: top left;
+        }
+
+        /* ===== Printable timecard template ===== */
+        #timecard {
+            width: 1130px;
+            min-height: 650px;
+            background: white;
+            color: black;
+            padding: 12px;
+            font-family: Helvetica, Arial, sans-serif;
+            font-stretch: normal;
+            letter-spacing: 0;
+        }
+
+        .sheet {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 3px solid #000;
+            font-family: Helvetica, Arial, sans-serif;
+            color: #000;
+            line-height: 1.08;
+        }
+
+            .sheet td,
+            .sheet th {
+                border: 1.8px solid #000;
+                padding: 4px 7px;
+                vertical-align: middle;
+                overflow: hidden;
+                font-weight: 400;
+            }
+
+        .thick-bottom td,
+        .thick-bottom th {
+            border-bottom-width: 3px;
+        }
+
+        .title-cell {
+            height: 48px;
+            text-align: center;
+            font-size: 21px;
+            font-weight: 600 !important;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .info-cell {
+            height: 46px;
+            font-size: 16px;
+            font-weight: 500 !important;
+            white-space: nowrap;
+        }
+
+        .header-cell {
+            height: 52px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500 !important;
+        }
+
+        .hours-header {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500 !important;
+            line-height: 1.05;
+        }
+
+        .line-row td {
+            height: 31px;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        .ro-cell,
+        .desc-cell,
+        .hours-cell {
+            text-align: center;
+        }
+
+        .hours-cell {
+            white-space: nowrap;
+        }
+
+        .time-label {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            text-align: left;
+        }
+
+        .time-value {
+            text-align: right;
+            font-size: 15px !important;
+            padding-right: 18px !important;
+        }
+
+        .signature-cell {
+            height: 54px;
+            font-size: 14px;
+            white-space: nowrap;
+            vertical-align: middle !important;
+        }
+
+        .bottom-head {
+            height: 26px;
+            font-size: 14px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .bottom-value {
+            height: 28px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .export-stage {
+            position: fixed;
+            left: -99999px;
+            top: 0;
+            width: 1130px;
+            background: white;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header>
+            <h1><span class="title-strong">Timecard</span> <span class="title-soft">Creator</span></h1>
+            <p>Daily serviceman time card generator</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="newTabBtn" onclick="showTab('new')">New Card</button>
+            <button class="tab-btn" id="savedTabBtn" onclick="showTab('saved')">History</button>
+        </div>
+
+        <section id="newTab">
+            <div class="card">
+                <div class="grid three">
+                    <div>
+                        <label>Date</label>
+                        <input id="dateInput" type="date" />
+                    </div>
+                    <div>
+                        <label>Tech ID</label>
+                        <input value="2918CL" disabled />
+                    </div>
+                    <div>
+                        <label>Name</label>
+                        <input value="COOPER LANE" disabled />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-top:0;">Add Job Entry</h2>
+
+                <div class="grid two">
+                    <div>
+                        <label>R/O Number</label>
+                        <input id="roInput" list="roSuggestions" oninput="handleROInput()" placeholder="Example: 566839" autocomplete="off" />
+                        <datalist id="roSuggestions"></datalist>
+                    </div>
+                    <div>
+                        <label>Hours Worked</label>
+                        <input id="hoursInput" list="hoursSuggestions" type="number" step="0.25" placeholder="Example: 6.75" autocomplete="off" />
+                        <datalist id="hoursSuggestions"></datalist>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px;">
+                    <label>Customer & Job Description</label>
+                    <input id="descriptionInput" list="descriptionSuggestions" placeholder="Example: EPE 1050K" autocomplete="off" />
+                    <datalist id="descriptionSuggestions"></datalist>
+                </div>
+
+                <div class="grid two" style="margin-top:12px;">
+                    <div>
+                        <label>Start Time</label>
+                        <input id="startInput" type="time" />
+                    </div>
+                    <div>
+                        <label>Calculated Stop Time</label>
+                        <input id="stopPreview" disabled />
+                    </div>
+                </div>
+
+                <p class="hint">Submitted cards and suggestions are saved locally in Safari/browser storage. Use <strong>Lunch</strong> to insert an unpaid lunch row.</p>
+
+                <div class="btn-row">
+                    <button class="primary" onclick="addEntry()">Add Entry</button>
+                    <button class="danger" onclick="addLunchRow()">Lunch</button>
+                    <button class="primary" onclick="submitTimecard()">Submit</button>
+                    <button class="secondary" onclick="downloadJPEG()">JPEG</button>
+                    <button class="danger" onclick="clearCurrentTimecard()">Clear</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-top:0;">Current Entries</h2>
+                <div id="entryList" class="entry-list"></div>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-top:0;">Timecard Preview</h2>
+                <div class="timecard-wrap" id="timecardWrap">
+                    <div class="timecard-scale" id="timecardScale">
+                        <div id="timecard"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="savedTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-top:0;">Saved Timecards</h2>
+                <div id="savedList"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <script>
+        const TECH_ID = '2918CL';
+        const TECH_NAME = 'COOPER LANE';
+
+        const STORAGE_KEYS = {
+            savedCards: 'cooperTimecard.savedCards.v2',
+            suggestions: 'cooperTimecard.suggestions.v2',
+            draft: 'cooperTimecard.currentDraft.v2'
+        };
+
+        let entries = [];
+        let loadedSavedId = null;
+
+        function todayLocalDateValue() {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function formatDateForSheet(value) {
+            if (!value) return '';
+            const [yyyy, mm, dd] = value.split('-');
+            return `${dd}/${mm}/${yyyy}`;
+        }
+
+        function parseTimeToMinutes(time) {
+            if (!time || !time.includes(':')) return null;
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function minutesToTime(totalMinutes) {
+            const mins = ((totalMinutes % 1440) + 1440) % 1440;
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function calculateStop(startTime, hours) {
+            const startMins = parseTimeToMinutes(startTime);
+            if (startMins === null || isNaN(hours)) return '';
+            return minutesToTime(startMins + Math.round(Number(hours) * 60));
+        }
+
+        function formatHoursDecimal(hours) {
+            const totalMinutes = Math.round(Number(hours || 0) * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            return `${h}:${String(m).padStart(2, '0')} hours`;
+        }
+
+        function formatTotalHours(hours) {
+            const totalMinutes = Math.round(Number(hours || 0) * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            return `${h}:${String(m).padStart(2, '0')}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function getSavedCards() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.savedCards) || '[]');
+        }
+
+        function setSavedCards(cards) {
+            localStorage.setItem(STORAGE_KEYS.savedCards, JSON.stringify(cards));
+        }
+
+        function getSuggestions() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.suggestions) || '{"roMap":{},"descriptions":[],"hours":[],"starts":[]}');
+        }
+
+        function setSuggestions(suggestions) {
+            localStorage.setItem(STORAGE_KEYS.suggestions, JSON.stringify(suggestions));
+        }
+
+        function rememberSuggestion(ro, description, hours, start) {
+            const suggestions = getSuggestions();
+            suggestions.roMap[ro] = description;
+            suggestions.descriptions = addUnique(suggestions.descriptions, description, 80);
+            suggestions.hours = addUnique(suggestions.hours, String(hours), 40);
+            suggestions.starts = addUnique(suggestions.starts, start, 40);
+            setSuggestions(suggestions);
+            refreshSuggestions();
+        }
+
+        function addUnique(array, value, limit) {
+            const clean = String(value || '').trim();
+            if (!clean) return array || [];
+            const filtered = (array || []).filter(x => String(x).toLowerCase() !== clean.toLowerCase());
+            filtered.unshift(clean);
+            return filtered.slice(0, limit);
+        }
+
+        function refreshSuggestions() {
+            const suggestions = getSuggestions();
+
+            const roList = document.getElementById('roSuggestions');
+            roList.innerHTML = '';
+            Object.keys(suggestions.roMap).sort().forEach(ro => {
+                const option = document.createElement('option');
+                option.value = ro;
+                option.label = suggestions.roMap[ro];
+                roList.appendChild(option);
+            });
+
+            const descriptionList = document.getElementById('descriptionSuggestions');
+            descriptionList.innerHTML = '';
+            suggestions.descriptions.forEach(description => {
+                const option = document.createElement('option');
+                option.value = description;
+                descriptionList.appendChild(option);
+            });
+
+            const hoursList = document.getElementById('hoursSuggestions');
+            hoursList.innerHTML = '';
+            suggestions.hours.forEach(hours => {
+                const option = document.createElement('option');
+                option.value = hours;
+                hoursList.appendChild(option);
+            });
+        }
+
+        function handleROInput() {
+            const ro = document.getElementById('roInput').value.trim();
+            const suggestions = getSuggestions();
+            if (suggestions.roMap[ro]) {
+                document.getElementById('descriptionInput').value = suggestions.roMap[ro];
+            }
+        }
+
+        function calculatePreview() {
+            const start = document.getElementById('startInput').value;
+            const hours = Number(document.getElementById('hoursInput').value);
+            document.getElementById('stopPreview').value = calculateStop(start, hours);
+        }
+
+        function addEntry() {
+            const ro = document.getElementById('roInput').value.trim();
+            const description = document.getElementById('descriptionInput').value.trim();
+            const hours = Number(document.getElementById('hoursInput').value);
+            const start = document.getElementById('startInput').value;
+            const stop = calculateStop(start, hours);
+
+            if (!ro || !description || !hours || !start) {
+                alert('Please fill R/O, description, hours and start time.');
+                return;
+            }
+
+            entries.push({
+                id: crypto.randomUUID(),
+                type: 'work',
+                ro,
+                description,
+                hours,
+                start,
+                stop
+            });
+
+            rememberSuggestion(ro, description, hours, start);
+            clearEntryForm();
+            loadedSavedId = null;
+            saveDraft();
+            renderAll();
+            document.getElementById('roInput').focus();
+        }
+
+        function addLunchRow() {
+            entries.push({
+                id: crypto.randomUUID(),
+                type: 'lunch',
+                description: 'Lunch'
+            });
+            loadedSavedId = null;
+            saveDraft();
+            renderAll();
+        }
+
+        function clearEntryForm() {
+            document.getElementById('roInput').value = '';
+            document.getElementById('descriptionInput').value = '';
+            document.getElementById('hoursInput').value = '';
+            document.getElementById('startInput').value = '';
+            document.getElementById('stopPreview').value = '';
+        }
+
+        function clearCurrentTimecard() {
+            if (!entries.length) {
+                clearEntryForm();
+                loadedSavedId = null;
+                localStorage.removeItem(STORAGE_KEYS.draft);
+                document.getElementById('dateInput').value = todayLocalDateValue();
+                renderAll();
+                return;
+            }
+
+            if (!confirm('Clear the current timecard entries? This will not delete submitted timecards.')) return;
+
+            entries = [];
+            loadedSavedId = null;
+            clearEntryForm();
+            document.getElementById('dateInput').value = todayLocalDateValue();
+            localStorage.removeItem(STORAGE_KEYS.draft);
+            renderAll();
+        }
+
+        function removeEntry(id) {
+            entries = entries.filter(e => e.id !== id);
+            saveDraft();
+            renderAll();
+        }
+
+        function saveDraft() {
+            const draft = {
+                date: document.getElementById('dateInput').value,
+                entries,
+                loadedSavedId
+            };
+            localStorage.setItem(STORAGE_KEYS.draft, JSON.stringify(draft));
+        }
+
+        function loadDraft() {
+            const raw = localStorage.getItem(STORAGE_KEYS.draft);
+            if (!raw) return;
+            try {
+                const draft = JSON.parse(raw);
+                if (draft.date) document.getElementById('dateInput').value = draft.date;
+                entries = Array.isArray(draft.entries) ? draft.entries : [];
+                loadedSavedId = draft.loadedSavedId || null;
+            } catch { }
+        }
+
+        function renderEntries() {
+            const list = document.getElementById('entryList');
+            if (!entries.length) {
+                list.innerHTML = '<p class="muted">No entries added yet.</p>';
+                return;
+            }
+
+            list.innerHTML = entries.map(e => {
+                if (e.type === 'lunch') {
+                    return `
+                <div class="entry-item">
+                  <strong>Lunch</strong>
+                  <div class="entry-meta">Unpaid lunch row. Not counted in total hours.</div>
+                  <button class="danger" style="margin-top:10px;padding:8px 12px;" onclick="removeEntry('${e.id}')">Remove</button>
+                </div>
+              `;
+                }
+
+                return `
+              <div class="entry-item">
+                <strong>R/O ${escapeHtml(e.ro)} — ${escapeHtml(e.description)}</strong>
+                <div class="entry-meta">${e.start} to ${e.stop} | ${formatHoursDecimal(e.hours)}</div>
+                <button class="danger" style="margin-top:10px;padding:8px 12px;" onclick="removeEntry('${e.id}')">Remove</button>
+              </div>
+            `;
+            }).join('');
+        }
+
+        function buildWorkRows(e) {
+            return `
+            <tr class="line-row">
+              <td rowspan="2" class="ro-cell">${escapeHtml(e.ro)}</td>
+              <td rowspan="2" class="desc-cell">${escapeHtml(e.description)}</td>
+              <td rowspan="2" class="hours-cell">${formatHoursDecimal(e.hours)}</td>
+              <td class="time-label">start</td>
+              <td colspan="3" class="time-value">${e.start}</td>
+            </tr>
+            <tr class="line-row">
+              <td class="time-label">stop</td>
+              <td colspan="3" class="time-value">${e.stop}</td>
+            </tr>
+          `;
+        }
+
+        function buildLunchRows() {
+            return `
+            <tr class="line-row">
+              <td rowspan="2"></td>
+              <td rowspan="2" class="desc-cell">Lunch</td>
+              <td rowspan="2"></td>
+              <td class="time-label">start</td>
+              <td colspan="3"></td>
+            </tr>
+            <tr class="line-row">
+              <td class="time-label">stop</td>
+              <td colspan="3"></td>
+            </tr>
+          `;
+        }
+
+        function buildBlankRows(count) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+              <tr class="line-row">
+                <td rowspan="2"></td>
+                <td rowspan="2"></td>
+                <td rowspan="2"></td>
+                <td class="time-label">start</td>
+                <td colspan="3"></td>
+              </tr>
+              <tr class="line-row">
+                <td class="time-label">stop</td>
+                <td colspan="3"></td>
+              </tr>
+            `;
+            }
+            return html;
+        }
+
+        function buildSheetHtml(cardEntries = entries, cardDate = document.getElementById('dateInput').value) {
+            const total = cardEntries
+                .filter(e => e.type === 'work')
+                .reduce((sum, e) => sum + Number(e.hours || 0), 0);
+
+            let html = `
+            <table class="sheet">
+              <colgroup>
+                <col style="width:19%">
+                <col style="width:41%">
+                <col style="width:13%">
+                <col style="width:8%">
+                <col style="width:9%">
+                <col style="width:5%">
+                <col style="width:5%">
+              </colgroup>
+              <tbody>
+                <tr class="thick-bottom">
+                  <td colspan="2"></td>
+                  <td colspan="5" class="title-cell">SERVICEMAN DAILY TIME CARD</td>
+                </tr>
+                <tr class="thick-bottom">
+                  <td class="info-cell">Tech ID: 2918CL</td>
+                  <td class="info-cell">Name: COOPER LANE</td>
+                  <td></td>
+                  <td colspan="4" class="info-cell">DATE: ${formatDateForSheet(cardDate)}</td>
+                </tr>
+                <tr class="thick-bottom">
+                  <th class="header-cell">R/O No.</th>
+                  <th class="header-cell">Customer and Job descriptions/Material used</th>
+                  <th class="hours-header">Number<br>of hours</th>
+                  <th colspan="4"></th>
+                </tr>
+          `;
+
+            cardEntries.forEach(e => {
+                html += e.type === 'lunch' ? buildLunchRows() : buildWorkRows(e);
+            });
+
+            html += buildBlankRows(Math.max(0, 6 - cardEntries.length));
+
+            html += `
+                <tr>
+                  <td class="signature-cell">Serviceman's Signature: CDL</td>
+                  <td class="signature-cell">Service Manager Signature:</td>
+                  <td class="bottom-head">Total Hrs.</td>
+                  <td colspan="2" class="bottom-head">Overtime</td>
+                  <td colspan="2" class="bottom-head">Sick Hrs</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td class="bottom-value">${formatTotalHours(total)}</td>
+                  <td colspan="2"></td>
+                  <td colspan="2"></td>
+                </tr>
+              </tbody>
+            </table>
+          `;
+
+            return html;
+        }
+
+        function renderSheet() {
+            document.getElementById('timecard').innerHTML = buildSheetHtml();
+        }
+
+        function fitTimecardPreview() {
+            const wrap = document.getElementById('timecardWrap');
+            const scaleEl = document.getElementById('timecardScale');
+            const card = document.getElementById('timecard');
+            if (!wrap || !scaleEl || !card) return;
+
+            const availableWidth = wrap.clientWidth - 20;
+            const scale = Math.min(1, availableWidth / 1130);
+
+            scaleEl.style.transform = `scale(${scale})`;
+            scaleEl.style.width = '1130px';
+            scaleEl.style.height = `${card.offsetHeight * scale}px`;
+
+            wrap.style.height = `${card.offsetHeight * scale + 20}px`;
+        }
+
+        function renderAll() {
+            renderEntries();
+            renderSheet();
+            renderSavedList();
+            setTimeout(fitTimecardPreview, 0);
+        }
+
+        function submitTimecard() {
+            if (!entries.length) {
+                alert('Add at least one entry first.');
+                return;
+            }
+
+            const saved = getSavedCards();
+            const card = {
+                id: loadedSavedId || crypto.randomUUID(),
+                date: document.getElementById('dateInput').value,
+                techId: TECH_ID,
+                techName: TECH_NAME,
+                entries: JSON.parse(JSON.stringify(entries)),
+                savedAt: new Date().toISOString()
+            };
+
+            const existingIndex = saved.findIndex(x => x.id === card.id);
+            if (existingIndex >= 0) saved[existingIndex] = card;
+            else saved.unshift(card);
+
+            setSavedCards(saved);
+            loadedSavedId = card.id;
+            saveDraft();
+            alert('Timecard submitted and saved.');
+            renderSavedList();
+        }
+
+        function renderSavedList() {
+            const saved = getSavedCards();
+            const list = document.getElementById('savedList');
+            if (!saved.length) {
+                list.innerHTML = '<p class="muted">No saved timecards yet.</p>';
+                return;
+            }
+
+            list.innerHTML = saved.map(card => {
+                const total = card.entries
+                    .filter(e => e.type === 'work')
+                    .reduce((sum, e) => sum + Number(e.hours || 0), 0);
+
+                return `
+              <div class="saved-item">
+                <div>
+                  <strong>${formatDateForSheet(card.date)}</strong>
+                  <div class="muted">${card.entries.length} rows | ${formatTotalHours(total)} hrs</div>
+                </div>
+                <div class="saved-actions">
+                  <button class="secondary" onclick="loadSaved('${card.id}')">Open</button>
+                  <button class="secondary" onclick="downloadSavedJPEG('${card.id}')">JPEG</button>
+                  <button class="danger" onclick="deleteSaved('${card.id}')">Delete</button>
+                </div>
+              </div>
+            `;
+            }).join('');
+        }
+
+        function loadSaved(id) {
+            const saved = getSavedCards();
+            const card = saved.find(x => x.id === id);
+            if (!card) return;
+
+            loadedSavedId = card.id;
+            entries = JSON.parse(JSON.stringify(card.entries));
+            document.getElementById('dateInput').value = card.date;
+            saveDraft();
+            showTab('new');
+            renderAll();
+        }
+
+        function deleteSaved(id) {
+            if (!confirm('Delete this saved timecard?')) return;
+            let saved = getSavedCards();
+            saved = saved.filter(x => x.id !== id);
+            setSavedCards(saved);
+            if (loadedSavedId === id) loadedSavedId = null;
+            renderSavedList();
+        }
+
+        async function exportCardToJPEG(cardEntries, cardDate) {
+            const stage = document.createElement('div');
+            stage.className = 'export-stage';
+            const exportCard = document.createElement('div');
+            exportCard.id = 'timecard';
+            exportCard.style.transform = 'none';
+            exportCard.style.width = '1130px';
+            exportCard.innerHTML = buildSheetHtml(cardEntries, cardDate);
+            stage.appendChild(exportCard);
+            document.body.appendChild(stage);
+
+            await new Promise(resolve => requestAnimationFrame(resolve));
+
+            const canvas = await html2canvas(exportCard, {
+                backgroundColor: '#ffffff',
+                scale: 3,
+                width: exportCard.offsetWidth,
+                height: exportCard.offsetHeight,
+                windowWidth: 1130,
+                scrollX: 0,
+                scrollY: 0
+            });
+
+            document.body.removeChild(stage);
+
+            const link = document.createElement('a');
+            link.download = `timecard-${cardDate || todayLocalDateValue()}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.98);
+            link.click();
+        }
+
+        async function downloadJPEG() {
+            renderSheet();
+            await exportCardToJPEG(entries, document.getElementById('dateInput').value || todayLocalDateValue());
+        }
+
+        async function downloadSavedJPEG(id) {
+            const saved = getSavedCards();
+            const card = saved.find(x => x.id === id);
+            if (!card) return;
+            await exportCardToJPEG(card.entries, card.date);
+        }
+
+        function showTab(tab) {
+            document.getElementById('newTab').classList.toggle('hidden', tab !== 'new');
+            document.getElementById('savedTab').classList.toggle('hidden', tab !== 'saved');
+            document.getElementById('newTabBtn').classList.toggle('active', tab === 'new');
+            document.getElementById('savedTabBtn').classList.toggle('active', tab === 'saved');
+            renderSavedList();
+        }
+
+        document.getElementById('dateInput').value = todayLocalDateValue();
+        loadDraft();
+
+        document.getElementById('dateInput').addEventListener('change', () => { saveDraft(); renderAll(); });
+        document.getElementById('hoursInput').addEventListener('input', calculatePreview);
+        document.getElementById('startInput').addEventListener('change', calculatePreview);
+        window.addEventListener('resize', fitTimecardPreview);
+
+        refreshSuggestions();
+        renderAll();
+    </script>
+</body>
+</html>
